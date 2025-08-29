@@ -1,0 +1,94 @@
+/* ======== Estilos Generales ======== */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: #333;
+}
+
+/* ======== Contenedor Principal ======== */
+.container {
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  display: inline-block;
+  margin-top: 50px;
+  max-width: 500px;
+  width: 90%;
+  transition: transform 0.2s ease-in-out;
+}
+
+.container:hover {
+  transform: scale(1.02);
+}
+
+/* ======== Título ======== */
+.container h2 {
+  color: #39a900;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+/* ======== Inputs y Selects ======== */
+input, select {
+  margin: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+input:focus, select:focus {
+  border-color: #39a900;
+  outline: none;
+  box-shadow: 0 0 5px rgba(57, 169, 0, 0.5);
+}
+
+/* ======== Botones ======== */
+button {
+  margin: 10px 5px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #39a900;
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #2e8500;
+  transform: scale(1.05);
+}
+
+/* ======== Opciones de configuración ======== */
+.options {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  text-align: left;
+  border: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+
+.options label {
+  display: block;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+/* ======== Canvas (QR) ======== */
+canvas {
+  margin-top: 20px;
+  border: 2px solid #39a900;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+}
