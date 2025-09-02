@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estadísticas y Registros de Escaneos QR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .stats-card {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .filter-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <h1 class="mb-4 text-center text-success">📊 Estadísticas y Registros de Escaneos QR</h1>
+
+    <!-- Resumen de Estadísticas -->
+    <div class="row mb-4" id="resumenStats">
+      <!-- Se llenarán dinámicamente -->
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>📈 Escaneos por Día (Últimos 7 días)</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="chartPorDia" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>🕐 Escaneos por Hora (Hoy)</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="chartPorHora" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros Avanzados -->
+    <div class="filter-section">
+      <h4 class="mb-3">🔍 Filtros Avanzados</h4>
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label class="form-label">Fecha específica:</label>
+          <input type="date" id="fechaFiltro" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Mes:</label>
+          <select id="mesFiltro" class="form-control">
+            <option value="">Todos los meses</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Año:</label>
+          <select id="añoFiltro" class="form-control">
+            <option value="">Todos los años</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Límite de registros:</label>
+          <select id="limiteFiltro" class="form-control">
+            <option value="50">50 registros</option>
+            <option value="100" selected>100 registros</option>
+            <option value="200">200 registros</option>
+            <option value="500">500 registros</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label class="form-label">Hora desde:</label>
+          <select id="horaInicioFiltro" class="form-control">
+            <option value="">Cualquier hora</option>
+            <option value="0">00:00</option>
+            <option value="6">06:00</option>
+            <option value="12">12:00</option>
+            <option value="18">18:00</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Hora hasta:</label>
+          <select id="horaFinFiltro" class="form-control">
+            <option value="">Cualquier hora</option>
+            <option value="6">06:00</option>
+            <option value="12">12:00</option>
+            <option value="18">18:00</option>
+            <option value="23">23:00</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">&nbsp;</label>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success flex-fill" onclick="cargarRegistros()">🔍 Filtrar Registros</button>
+            <button class="btn btn-info flex-fill" onclick="cargarEstadisticas()">📊 Actualizar Estadísticas</button>
+            <button class="btn btn-secondary flex-fill" onclick="limpiarFiltros()">🗑️ Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Registros -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">📋 Registros Detallados</h5>
+        <span id="totalRegistros" class="badge bg-success">0 registros</span>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped table-hover">
+            <thead class="table-success">
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Timestamp</th>
+                <th>IP</th>
+                <th>User Agent</th>
+                <th>Año</th>
+                <th>Mes</th>
+              </tr>
+            </thead>
+            <tbody id="tablaRegistros">
+              <tr>
+                <td colspan="8" class="text-center">Cargando registros...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let chartPorDia, chartPorHora;
+
+    // Función para cargar estadísticas
+    async function cargarEstadisticas() {
+      try {
+        const res = await fetch("http://127.0.0.1:8001/estadisticas");
+        const data = await res.json();
+        
+        mostrarResumenStats(data);
+        crearGraficos(data);
+      } catch (error) {
+        console.error("Error al cargar estadísticas:", error);
+      }
+    }
+
+    // Función para mostrar resumen de estadísticas
+    function mostrarResumenStats(data) {
+      const resumenDiv = document.getElementById("resumenStats");
+      resumenDiv.innerHTML = `
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <h3>${data.total_escaneos}</h3>
+            <p class="mb-0">Total Escaneos</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <h3>${data.escaneos_por_dia.length}</h3>
+            <p class="mb-0">Días con Actividad</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <h3>${data.escaneos_por_hora_hoy.length}</h3>
+            <p class="mb-0">Horas Activas Hoy</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card text-center">
+            <h3>${data.escaneos_por_dia.reduce((sum, dia) => sum + dia.total_escaneos, 0)}</h3>
+            <p class="mb-0">Escaneos (7 días)</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Función para crear gráficos
+    function crearGraficos(data) {
+      // Gráfico por día
+      const ctxDia = document.getElementById('chartPorDia').getContext('2d');
+      if (chartPorDia) chartPorDia.destroy();
+      
+      chartPorDia = new Chart(ctxDia, {
+        type: 'line',
+        data: {
+          labels: data.escaneos_por_dia.map(d => d.fecha),
+          datasets: [{
+            label: 'Escaneos por Día',
+            data: data.escaneos_por_dia.map(d => d.total_escaneos),
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Gráfico por hora
+      const ctxHora = document.getElementById('chartPorHora').getContext('2d');
+      if (chartPorHora) chartPorHora.destroy();
+      
+      chartPorHora = new Chart(ctxHora, {
+        type: 'bar',
+        data: {
+          labels: data.escaneos_por_hora_hoy.map(h => `${h.hour}:00`),
+          datasets: [{
+            label: 'Escaneos por Hora',
+            data: data.escaneos_por_hora_hoy.map(h => h.total_escaneos),
+            backgroundColor: '#20c997'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    // Función para cargar registros con filtros
+    async function cargarRegistros() {
+      const fecha = document.getElementById("fechaFiltro").value;
+      const mes = document.getElementById("mesFiltro").value;
+      const año = document.getElementById("añoFiltro").value;
+      const horaInicio = document.getElementById("horaInicioFiltro").value;
+      const horaFin = document.getElementById("horaFinFiltro").value;
+      const limite = document.getElementById("limiteFiltro").value;
+
+      let url = "http://127.0.0.1:8001/registros";
+      const params = [];
+
+      if (fecha) params.push("fecha=" + fecha);
+      if (mes) params.push("mes=" + mes);
+      if (año) params.push("año=" + año);
+      if (horaInicio) params.push("hora_inicio=" + horaInicio);
+      if (horaFin) params.push("hora_fin=" + horaFin);
+      if (limite) params.push("limit=" + limite);
+
+      if (params.length > 0) {
+        url += "?" + params.join("&");
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        mostrarTabla(data.registros, data.total);
+      } catch (error) {
+        console.error("Error al cargar registros:", error);
+        document.getElementById("tablaRegistros").innerHTML = 
+          '<tr><td colspan="8" class="text-center text-danger">Error al cargar registros</td></tr>';
+      }
+    }
+
+    // Función para mostrar tabla
+    function mostrarTabla(registros, total) {
+      const tbody = document.getElementById("tablaRegistros");
+      const totalSpan = document.getElementById("totalRegistros");
+      
+      totalSpan.textContent = `${total || registros.length} registros`;
+      
+      if (registros.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay registros que coincidan con los filtros</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = "";
+      registros.forEach(r => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${r.id}</td>
+            <td>${r.fecha}</td>
+            <td>${r.hora}</td>
+            <td>${r.timestamp ? new Date(r.timestamp).toLocaleString() : '-'}</td>
+            <td>${r.ip || "-"}</td>
+            <td title="${r.user_agent || ''}">${r.user_agent ? r.user_agent.substring(0, 30) + '...' : '-'}</td>
+            <td>${r.year || '-'}</td>
+            <td>${r.month || '-'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Función para limpiar filtros
+    function limpiarFiltros() {
+      document.getElementById("fechaFiltro").value = "";
+      document.getElementById("mesFiltro").value = "";
+      document.getElementById("añoFiltro").value = "";
+      document.getElementById("horaInicioFiltro").value = "";
+      document.getElementById("horaFinFiltro").value = "";
+      document.getElementById("limiteFiltro").value = "100";
+      cargarRegistros();
+    }
+
+    // Cargar datos al inicio
+    document.addEventListener('DOMContentLoaded', function() {
+      cargarEstadisticas();
+      cargarRegistros();
+    });
+  </script>
+</body>
+</html>
